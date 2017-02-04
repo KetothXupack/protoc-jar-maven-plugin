@@ -39,6 +39,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.sonatype.plexus.build.incremental.BuildContext;
 
@@ -49,6 +50,7 @@ import com.github.os72.protocjar.ProtocVersion;
 /**
  * Compiles .proto files using protoc-jar embedded protoc compiler. Also supports pre-installed protoc binary, and downloading binaries (protoc and protoc plugins) from maven repo
  * 
+ * @threadSafe true
  * @goal run
  * @phase generate-sources
  * @requiresDependencyResolution
@@ -56,6 +58,8 @@ import com.github.os72.protocjar.ProtocVersion;
 public class ProtocJarMojo extends AbstractMojo
 {
 	private static final String DEFAULT_INPUT_DIR = "/src/main/protobuf/".replace('/', File.separatorChar);
+
+	private static final Object globalLock = new Object();
 
     /**
 	 * Specifies the protoc version (default: latest version).
@@ -261,7 +265,13 @@ public class ProtocJarMojo extends AbstractMojo
 	/** @component */
 	private ArtifactResolver artifactResolver;
 
-    public void execute() throws MojoExecutionException {
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		synchronized (globalLock) {
+			doExecute();
+		}
+	}
+
+	public void doExecute() throws MojoExecutionException {
 		if (project.getPackaging() != null && "pom".equals(project.getPackaging().toLowerCase())) {
 			getLog().info("Skipping 'pom' packaged project");
 			return;
