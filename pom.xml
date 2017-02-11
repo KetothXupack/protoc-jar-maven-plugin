@@ -39,9 +39,9 @@
 
   <dependencies>
 	<dependency>
-	  <groupId>com.github.os72</groupId>
+	  <groupId>org.no-hope</groupId>
 	  <artifactId>protoc-jar</artifactId>
-	  <version>3.1.0.3</version>
+	  <version>3.1.0.4-RC1</version>
 	</dependency>
 	<dependency>
 	  <groupId>org.apache.maven</groupId>
